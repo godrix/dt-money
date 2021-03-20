@@ -6,7 +6,7 @@ import {createServer, Model} from 'miragejs'
 
 createServer({
   models:{
-    transaction:Model
+    transactions:Model
   },
   seeds(server){
     server.db.loadData({

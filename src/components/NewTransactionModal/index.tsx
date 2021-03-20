@@ -4,7 +4,7 @@ import { Container, TransactionTypeContainer, RadioBox } from './styles';
 import closeSvg from '../../assets/close.svg';
 import incomeSvg from '../../assets/income.svg';
 import outcomeSvg from '../../assets/outcome.svg';
-import { api } from '../../services/api';
+import { useTransactions } from '../../hooks/useTransactions';
 
 Modal.setAppElement('#root');
 
@@ -14,21 +14,29 @@ interface NewTransactionModalProps {
 }
 
 export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionModalProps) {
-  const [type, setType] = useState('deposit');
+  const {createTransaction} = useTransactions()
+  const [type, setType] = useState<'deposit'|'withDraw'>('deposit');
   const [valuesNewTransaction, setValuesNewTransaction] = useState({
     title: '',
-    value: 0,
+    amount: 0,
     category: ''
   });
 
   function handleNewTransaction(event: React.FormEvent) {
     event.preventDefault();
-    const data = {
+    
+    createTransaction({
       ...valuesNewTransaction,
       type
-    }
+    })
 
-    api.post('/transactions', data)
+    setValuesNewTransaction({
+      title: '',
+      amount: 0,
+      category: ''
+    })
+    setType('deposit');
+    onRequestClose()
 
   }
 
@@ -54,8 +62,8 @@ export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionMo
         <input
           type="number"
           placeholder="Valor"
-          value={valuesNewTransaction.value}
-          onChange={event=>setValuesNewTransaction({...valuesNewTransaction, value:Number(event.target.value)})}
+          value={valuesNewTransaction.amount}
+          onChange={event=>setValuesNewTransaction({...valuesNewTransaction, amount:Number(event.target.value)})}
         />
         <TransactionTypeContainer>
           <RadioBox
@@ -69,8 +77,8 @@ export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionMo
           </RadioBox>
           <RadioBox
             type="button"
-            onClick={() => setType('withdraw')}
-            isActive={type === 'withdraw'}
+            onClick={() => setType('withDraw')}
+            isActive={type === 'withDraw'}
             activeColor='red'
           >
             <img src={outcomeSvg} alt="Saída" />
